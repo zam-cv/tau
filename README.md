@@ -41,3 +41,14 @@ Once you're within a project directory, Tau can detect the template in use and p
 ### 5. Work seamlessly across directories:
 
 Tau can traverse directories to find the root of your project, ensuring commands are executed correctly, even if you're in a subdirectory of the project.
+
+### 6. Editing Commands and Managing Templates:
+
+To edit commands or add more templates, navigate to the `config.json` file by using the command `tau path`. You will see:
+
+```bash
+Config: \"PROJECT_DIR/config.json\"
+Templates: \"PROJECT_DIR/templates/\"
+```
+
+The `config.json` file is where you can add or modify commands. The `templates/` directory is where you can place new project templates or edit existing ones.
