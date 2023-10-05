@@ -47,8 +47,8 @@ Tau can traverse directories to find the root of your project, ensuring commands
 To edit commands or add more templates, navigate to the `config.json` file by using the command `tau path`. You will see:
 
 ```bash
-Config: \"PROJECT_DIR/config.json\"
-Templates: \"PROJECT_DIR/templates/\"
+Config: "PROJECT_DIR/config.json"
+Templates: "PROJECT_DIR/templates/"
 ```
 
 The `config.json` file is where you can add or modify commands. The `templates/` directory is where you can place new project templates or edit existing ones.
