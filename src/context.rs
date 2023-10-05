@@ -229,20 +229,22 @@ impl Context {
 
         if let Some(home) = dirs::home_dir() {
             let mut template_name = None;
+            let mut current_path = project_path.clone();
 
             dir::up(&home, &project_path, &mut |path| {
+                current_path = path;
                 for (name, project_config) in &mut config.0 {
-                    if let Some(_) = project_config.routes.get(&path) {
+                    if let Some(_) = project_config.routes.get(&current_path) {
                         let template_path = directory.templates.join(&name);
 
-                        match compare_dir(&template_path, &path, &project_config.optional_files) {
+                        match compare_dir(&template_path, &current_path, &project_config.optional_files) {
                             Ok(true) => {
                                 template_name = Some(name.clone());
                                 return Some(());
                             }
                             Ok(false) => {
                                 // If the project was found but the structure is not the same
-                                project_config.routes.remove(&path);
+                                project_config.routes.remove(&current_path);
                             }
                             Err(_) => {}
                         }
@@ -256,8 +258,8 @@ impl Context {
 
             if let Some(template_name) = template_name {
                 if let Some(mut project_config) = config.0.remove(&template_name) {
-                    let details = Details::from(&project_path);
-                    project_config.routes.insert(project_path);
+                    let details = Details::from(&current_path);
+                    project_config.routes.insert(current_path);
 
                     return Ok(Context {
                         details,
@@ -269,7 +271,7 @@ impl Context {
 
             let mut coincidences = Vec::new();
 
-            let project_path = dir::up(&home, &project_path, &mut |path| {
+            let project_path = dir::up(&home, &current_path, &mut |path| {
                 for (name, project_config) in &config.0 {
                     let template_path = directory.templates.join(name);
 
