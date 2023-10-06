@@ -10,13 +10,11 @@
         "tasks": [
           {
             "name": "Build",
-            "command": "make",
-            "output": "optional"
+            "command": "make"
           },
           {
             "name": "Run",
-            "command": "./build/main",
-            "output": "required"
+            "command": "./build/main"
           }
         ],
         "args": null,
@@ -26,13 +24,11 @@
         "tasks": [
           {
             "name": "Test",
-            "command": "make tests",
-            "output": "optional"
+            "command": "make tests"
           },
           {
             "name": "Run",
-            "command": "./build/tests",
-            "output": "required"
+            "command": "./build/tests"
           }
         ],
         "args": null,
@@ -53,13 +49,11 @@
         "tasks": [
           {
             "name": "Build",
-            "command": "zig build",
-            "output": "optional"
+            "command": "zig build"
           },
           {
             "name": "Run",
-            "command": "./zig-out/bin/main",
-            "output": "required"
+            "command": "./zig-out/bin/main"
           }
         ],
         "args": null,
@@ -69,8 +63,7 @@
         "tasks": [
           {
             "name": "Test",
-            "command": "zig build test",
-            "output": "optional"
+            "command": "zig build test"
           }
         ],
         "args": null,
@@ -85,13 +78,11 @@
         "tasks": [
           {
             "name": "Build",
-            "command": "go build -o bin/main ./cmd/",
-            "output": "optional"
+            "command": "go build -o bin/main ./cmd/"
           },
           {
             "name": "Run",
-            "command": "./bin/main",
-            "output": "required"
+            "command": "./bin/main"
           }
         ],
         "args": null,
@@ -101,8 +92,7 @@
         "tasks": [
           {
             "name": "Test",
-            "command": "go test ./...",
-            "output": "required"
+            "command": "go test ./..."
           }
         ],
         "args": null,
@@ -127,8 +117,7 @@
         "tasks": [
           {
             "name": "Run",
-            "command": "python src/main.py",
-            "output": "required"
+            "command": "python src/main.py"
           }
         ],
         "args": null,
@@ -138,8 +127,7 @@
         "tasks": [
           {
             "name": "Test",
-            "command": "pytest",
-            "output": "required"
+            "command": "pytest"
           }
         ],
         "args": null,
@@ -149,8 +137,7 @@
         "tasks": [
           {
             "name": "Install",
-            "command": "pip install {{package}}",
-            "output": "required"
+            "command": "pip install {{package}}"
           }
         ],
         "args": [
@@ -176,8 +163,7 @@
         "tasks": [
           {
             "name": "Run",
-            "command": "bun run src/main.ts",
-            "output": "required"
+            "command": "bun run src/main.ts"
           }
         ],
         "args": null,
@@ -187,8 +173,7 @@
         "tasks": [
           {
             "name": "Install",
-            "command": "bun install {{package}}",
-            "output": "required"
+            "command": "bun install {{package}}"
           }
         ],
         "args": [

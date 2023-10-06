@@ -58,7 +58,8 @@ The `config.json` file is where you can add or modify commands. The `templates/`
 Example of configuring the default C++ template found in the `config.json` file.
 
 ```json
-"c++": {
+{
+  "c++": {
     "optional_files": [
       ".gitignore",
       "README.md",
@@ -69,13 +70,11 @@ Example of configuring the default C++ template found in the `config.json` file.
         "tasks": [
           {
             "name": "Build",
-            "command": "make",
-            "output": "optional"
+            "command": "make"
           },
           {
             "name": "Run",
-            "command": "./build/main",
-            "output": "required"
+            "command": "./build/main"
           }
         ],
         "args": null,
@@ -85,13 +84,11 @@ Example of configuring the default C++ template found in the `config.json` file.
         "tasks": [
           {
             "name": "Test",
-            "command": "make tests",
-            "output": "optional"
+            "command": "make tests"
           },
           {
             "name": "Run",
-            "command": "./build/tests",
-            "output": "required"
+            "command": "./build/tests"
           }
         ],
         "args": null,
@@ -99,5 +96,6 @@ Example of configuring the default C++ template found in the `config.json` file.
       }
     },
     "routes": []
+  }
 }
 ```

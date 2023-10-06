@@ -10,7 +10,6 @@ use dirs;
 use fs_extra::dir::copy;
 use serde::{Deserialize, Serialize};
 use shlex;
-use spinners::{Spinner, Spinners};
 use std::{
     fs,
     io::{BufWriter, Write},
@@ -53,8 +52,7 @@ pub struct CommandProject {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Task {
     pub name: String,
-    pub command: String,
-    pub output: Output,
+    pub command: String
 }
 
 // Project options
@@ -233,24 +231,34 @@ impl Context {
 
             dir::up(&home, &project_path, &mut |path| {
                 current_path = path;
-                for (name, project_config) in &mut config.0 {
-                    if let Some(_) = project_config.routes.get(&current_path) {
-                        let template_path = directory.templates.join(&name);
 
-                        match compare_dir(&template_path, &current_path, &project_config.optional_files) {
-                            Ok(true) => {
-                                template_name = Some(name.clone());
-                                return Some(());
+                loop {
+                    for (name, project_config) in &mut config.0 {
+                        if let Some(_) = project_config.routes.get(&current_path) {
+                            let template_path = directory.templates.join(&name);
+
+                            match compare_dir(
+                                &template_path,
+                                &current_path,
+                                &project_config.optional_files,
+                            ) {
+                                Ok(true) => {
+                                    template_name = Some(name.clone());
+                                    return Some(());
+                                }
+                                Ok(false) => {
+                                    // If the project was found but the structure is not the same
+                                    project_config.routes.remove(&current_path);
+                                    continue;
+                                }
+                                Err(_) => {}
                             }
-                            Ok(false) => {
-                                // If the project was found but the structure is not the same
-                                project_config.routes.remove(&current_path);
-                            }
-                            Err(_) => {}
+
+                            return None;
                         }
-
-                        return None;
                     }
+
+                    break;
                 }
 
                 None
@@ -321,7 +329,7 @@ impl Context {
     }
 
     // Run a command
-    pub fn exec(&self, command: &str, out: &bool, args: &HashMap<&str, &String>) -> Result<()> {
+    pub fn exec(&self, command: &str, time: &bool, args: &HashMap<&str, &String>) -> Result<()> {
         let command = command.to_lowercase();
 
         if let Some(command_project) = self.project_config.commands.get(&command.to_string()) {
@@ -336,41 +344,24 @@ impl Context {
                 };
 
                 if let Some(name) = command.next() {
-                    let command_name = format!("{} ", task.name.bold().cyan());
-                    let mut spinner = Spinner::new(Spinners::Dots9, command_name);
+                    let command_name = format!("\n{} ", task.name.bold().cyan());
+                    println!("{}\n", command_name);
+
                     let start = Instant::now();
-                    let output = Command::new(name)
+                    let status = Command::new(name)
                         .current_dir(&self.details.workspace)
                         .args(command)
-                        .output()?;
+                        .status()?;
+
                     let end = Instant::now();
-                    let time = end.duration_since(start);
+                    let duration = end.duration_since(start);
 
-                    spinner.stop();
-                    println!("{} ms", time.as_millis());
+                    if !status.success() {
+                        return Err(anyhow!(status.to_string().trim().to_string()));
+                    }
 
-                    match task.output {
-                        Output::Optional => {
-                            if *out {
-                                let content = String::from_utf8_lossy(&output.stdout);
-
-                                if !content.is_empty() {
-                                    println!("\n{}", content.trim());
-                                }
-                            }
-                        }
-                        Output::Required => {
-                            print!("\n{}\n", String::from_utf8_lossy(&output.stdout).trim());
-                        }
-                        Output::None => {}
-                    };
-
-                    if !output.status.success() {
-                        println!(
-                            "\n{} {}",
-                            "Error:".bold().red(),
-                            String::from_utf8_lossy(&output.stderr)
-                        );
+                    if *time {
+                        println!("\n{}: {} ms", "Time".bold().yellow(), duration.as_millis());
                     }
                 }
             }

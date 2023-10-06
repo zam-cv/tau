@@ -40,11 +40,11 @@ fn app() -> Result<()> {
             let description = persistent_str_optional(command_project.description.clone());
 
             let mut command = Command::new(name).arg(
-                Arg::new("output")
-                    .help("Show the output of the command")
+                Arg::new("time")
+                    .help("Show the time of the command")
                     .value_parser(clap::value_parser!(bool))
-                    .long("output")
-                    .short('o'),
+                    .long("time")
+                    .short('t')
             ).about(&description);
 
             if let Some(args) = &command_project.args {
@@ -86,7 +86,7 @@ fn app() -> Result<()> {
             (name, args) => {
                 if commands.contains(name) {
                     let context = context?;
-                    let output: &bool = args.get_one("output").unwrap_or(&false);
+                    let time: &bool = args.get_one("time").unwrap_or(&false);
 
                     let mut arguments: HashMap<&str, &String> = HashMap::new();
 
@@ -103,7 +103,7 @@ fn app() -> Result<()> {
                         }
                     }
 
-                    context.exec(name, &output, &arguments)?;
+                    context.exec(name, &time, &arguments)?;
                     ctx = Some(context);
 
                     Ok(())
