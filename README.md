@@ -52,3 +52,52 @@ Templates: "PROJECT_DIR/templates/"
 ```
 
 The `config.json` file is where you can add or modify commands. The `templates/` directory is where you can place new project templates or edit existing ones.
+
+## Example
+
+Example of configuring the default C++ template found in the `config.json` file.
+
+```json
+"c++": {
+    "optional_files": [
+      ".gitignore",
+      "README.md",
+      "tests/test.cpp"
+    ],
+    "commands": {
+      "run": {
+        "tasks": [
+          {
+            "name": "Build",
+            "command": "make",
+            "output": "optional"
+          },
+          {
+            "name": "Run",
+            "command": "./build/main",
+            "output": "required"
+          }
+        ],
+        "args": null,
+        "description": "Build and run the project"
+      },
+      "test": {
+        "tasks": [
+          {
+            "name": "Test",
+            "command": "make tests",
+            "output": "optional"
+          },
+          {
+            "name": "Run",
+            "command": "./build/tests",
+            "output": "required"
+          }
+        ],
+        "args": null,
+        "description": "Build and run the tests"
+      }
+    },
+    "routes": []
+}
+```

@@ -6,17 +6,17 @@ use include_dir::{include_dir, Dir};
 use std::{fs, path::PathBuf};
 use colored::Colorize;
 
-// Directorios del programa
+// Program Directories
 const PROJECT_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/public/");
 
-// Informacion general
+// General information
 const QUALIFIER: &str = "com";
 const ORGANIZATION: &str = "tau";
 const APPLICATION: &str = "dev";
 
-// Archivos y Carpetas del programa
+// Program Files and Folders
 const CONFIG: &str = "config.json";
-const TEMPLATES: &str = "templates/";
+const TEMPLATES: &str = "templates";
 
 pub struct Directory {
     pub root: PathBuf,
@@ -31,7 +31,7 @@ impl Directory {
         if let Some(dir) = dir {
             let path = dir.config_dir();
 
-            // Si no existe la carpeta se crea
+            // If the folder does not exist, it is created
             if !path.exists() {
                 fs::create_dir_all(&path)?;
             }
