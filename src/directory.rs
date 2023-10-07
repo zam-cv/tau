@@ -54,12 +54,7 @@ impl Directory {
 
     pub fn get_config(&self) -> Result<Config> {
         let config = fs::read_to_string(&self.config)?;
-
-        if let Ok(config) = serde_json::from_str(&config) {
-            return Ok(config);
-        }
-
-        Err(anyhow!("Error parsing config file"))
+        Ok(serde_json::from_str(&config)?)
     }
 
     pub fn display(&self) -> Result<()> {
