@@ -9,11 +9,10 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use dirs;
 use fs_extra::dir::copy;
 use serde::{Deserialize, Serialize};
-use shlex;
+use subprocess;
 use std::{
     fs,
-    io::{BufWriter, Write},
-    process::Command,
+    io::{BufWriter, Write, BufReader, BufRead},
     time::Instant,
     {
         collections::{BTreeMap, HashMap, HashSet},
@@ -334,35 +333,26 @@ impl Context {
 
         if let Some(command_project) = self.project_config.commands.get(&command.to_string()) {
             for task in command_project.tasks.iter() {
+                println!("\n{}\n", task.name.bold().cyan());
                 let command = replace_command(&task.command, &self.details, &args)?;
+                let start = Instant::now();
+                let mut command = subprocess::Exec::shell(&command)
+                    .cwd(&self.details.workspace)
+                    .stdout(subprocess::Redirection::Pipe)
+                    .stderr(subprocess::Redirection::Merge)
+                    .popen()?;
+                let end = Instant::now();
+                let duration = end.duration_since(start);
 
-                let mut command = match shlex::split(&command) {
-                    Some(value) => value.into_iter(),
-                    None => {
-                        return Err(anyhow!("Invalid command"));
-                    }
-                };
+                if let Some(stdout) = command.stdout.take() {
+                    let mut stdout = BufReader::new(stdout);
+                    let mut buffer = String::new();
+                    while stdout.read_line(&mut buffer)? != 0 {}
+                    println!("{}", buffer.trim());
+                }
 
-                if let Some(name) = command.next() {
-                    let command_name = format!("\n{} ", task.name.bold().cyan());
-                    println!("{}\n", command_name);
-
-                    let start = Instant::now();
-                    let status = Command::new(name)
-                        .current_dir(&self.details.workspace)
-                        .args(command)
-                        .status()?;
-
-                    let end = Instant::now();
-                    let duration = end.duration_since(start);
-
-                    if !status.success() {
-                        return Err(anyhow!(status.to_string().trim().to_string()));
-                    }
-
-                    if *time {
-                        println!("\n{}: {} ms", "Time".bold().yellow(), duration.as_millis());
-                    }
+                if *time {
+                    println!("\n{}: {} ms", "Time".bold().yellow(), duration.as_millis());
                 }
             }
 
