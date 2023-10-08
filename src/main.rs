@@ -39,13 +39,15 @@ fn app() -> Result<()> {
             let name: &'static str = persistent_str(name.clone());
             let description = persistent_str_optional(command_project.description.clone());
 
-            let mut command = Command::new(name).arg(
-                Arg::new("time")
-                    .help("Show the time of the command")
-                    .value_parser(clap::value_parser!(bool))
-                    .long("time")
-                    .short('t')
-            ).about(&description);
+            let mut command = Command::new(name)
+                .arg(
+                    Arg::new("time")
+                        .help("Show the time of the command")
+                        .num_args(0)
+                        .long("time")
+                        .short('t')
+                )
+                .about(&description);
 
             if let Some(args) = &command_project.args {
                 for arg in args {
@@ -68,25 +70,29 @@ fn app() -> Result<()> {
     }
 
     if let Some(subcommand) = main.get_matches().subcommand() {
-        let mut ctx = None;
-
-        let result =  match subcommand {
+        match subcommand {
             ("new", args) => {
                 let project_name: &String = args
                     .get_one("project_name")
                     .expect("project_name is required");
 
                 let template_name: Option<&String> = args.get_one("template_name");
-                ctx = Some(Context::new(project_name, template_name, &directory, &mut config)?);
-    
-                Ok(())
+
+                if let Ok(context) = context {
+                    config.0.insert(context.template_name, context.project_config);
+                }
+
+                let context = Context::new(project_name, template_name, &directory, &mut config)?;
+                config.0.insert(context.template_name, context.project_config);
+                config.update(&directory)?;
             }
-            ("path", _) => directory.display(),
-            ("list", _) => config.display(&directory),
+            ("path", _) => directory.display()?,
+            ("list", _) => config.display(&directory)?,
             (name, args) => {
+                let context = context?;
+
                 if commands.contains(name) {
-                    let context = context?;
-                    let time: &bool = args.get_one("time").unwrap_or(&false);
+                    let time: bool = args.get_flag("time");
 
                     let mut arguments: HashMap<&str, &String> = HashMap::new();
 
@@ -104,24 +110,17 @@ fn app() -> Result<()> {
                     }
 
                     context.exec(name, &time, &arguments)?;
-                    ctx = Some(context);
-
-                    Ok(())
                 } else {
-                    Err(anyhow!("Command not found"))
+                    return Err(anyhow!("Command not found"));
                 }
+
+                config.0.insert(context.template_name, context.project_config);
+                config.update(&directory)?;
             }
         };
+    };
 
-        if let Some(context) = ctx {
-            config.0.insert(context.template_name, context.project_config);
-            config.update(&directory)?;
-        }
-
-        return result;
-    }
-
-    Err(anyhow!("Command not found"))
+    Ok(())
 }
 
 fn main() {

@@ -146,24 +146,20 @@ impl Context {
         directory: &Directory,
         config: &mut Config,
     ) -> Result<Context> {
-        let current_dir = env::current_dir()?;
+        let mut project_path = env::current_dir()?;
 
-        let project_path = if project_name == "." {
+        if project_name == "." {
             // If there is content, the project cannot be created
-            if current_dir.read_dir()?.count() > 0 {
-                return Err(anyhow!("Directory not empty"));
+            if project_path.read_dir()?.count() > 0 {
+                return Err(anyhow!("The directory is not empty"));
             }
-
-            current_dir
         } else {
-            let current_dir = current_dir.join(project_name);
+            project_path = project_path.join(project_name);
 
             // Verify that the project does not exist
-            if current_dir.exists() {
+            if project_path.exists() {
                 return Err(anyhow!("Project already exists"));
             }
-
-            current_dir
         };
 
         let template_name = match template_name {
