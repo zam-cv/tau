@@ -80,6 +80,16 @@ Example of configuring the default C++ template found in the `config.json` file.
         "args": null,
         "description": "Build and run the project"
       },
+      "bin": {
+        "tasks": [
+          {
+            "name": "Bin",
+            "command": "./build/main"
+          }
+        ],
+        "args": null,
+        "description": "Run the project"
+      },
       "test": {
         "tasks": [
           {

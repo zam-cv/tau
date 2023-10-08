@@ -9,10 +9,9 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use dirs;
 use fs_extra::dir::copy;
 use serde::{Deserialize, Serialize};
-use subprocess;
 use std::{
     fs,
-    io::{BufWriter, Write, BufReader, BufRead},
+    io::{BufWriter, Write},
     time::Instant,
     {
         collections::{BTreeMap, HashMap, HashSet},
@@ -20,6 +19,7 @@ use std::{
         path::PathBuf,
     },
 };
+use subprocess;
 
 type TemplateName = String;
 
@@ -51,7 +51,7 @@ pub struct CommandProject {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Task {
     pub name: String,
-    pub command: String
+    pub command: String,
 }
 
 // Project options
@@ -336,20 +336,14 @@ impl Context {
                 println!("\n{}\n", task.name.bold().cyan());
                 let command = replace_command(&task.command, &self.details, &args)?;
                 let start = Instant::now();
-                let mut command = subprocess::Exec::shell(&command)
+                let result = subprocess::Exec::shell(&command)
                     .cwd(&self.details.workspace)
                     .stdout(subprocess::Redirection::Pipe)
                     .stderr(subprocess::Redirection::Merge)
-                    .popen()?;
+                    .capture()?;
                 let end = Instant::now();
                 let duration = end.duration_since(start);
-
-                if let Some(stdout) = command.stdout.take() {
-                    let mut stdout = BufReader::new(stdout);
-                    let mut buffer = String::new();
-                    while stdout.read_line(&mut buffer)? != 0 {}
-                    println!("{}", buffer.trim());
-                }
+                println!("{}", result.stdout_str().trim());
 
                 if *time {
                     println!("\n{}: {} ms", "Time".bold().yellow(), duration.as_millis());
