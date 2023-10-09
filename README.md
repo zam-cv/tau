@@ -63,7 +63,8 @@ Example of configuring the default C++ template found in the `config.json` file.
     "optional_files": [
       ".gitignore",
       "README.md",
-      "tests/test.cpp"
+      "tests/test.cpp",
+      "include/add.h"
     ],
     "commands": {
       "run": {
