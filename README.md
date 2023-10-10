@@ -104,6 +104,16 @@ Example of configuring the default C++ template found in the `config.json` file.
         ],
         "args": null,
         "description": "Build and run the tests"
+      },
+      "clean": {
+        "tasks": [
+          {
+            "name": "Clean",
+            "command": "make clean"
+          }
+        ],
+        "args": null,
+        "description": "Clean the project"
       }
     },
     "routes": []
