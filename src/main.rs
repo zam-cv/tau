@@ -8,6 +8,7 @@ use utils::string::{persistent_str, persistent_str_optional};
 
 mod context;
 mod directory;
+mod exec;
 mod utils;
 
 fn app() -> Result<()> {
@@ -26,7 +27,14 @@ fn app() -> Result<()> {
                 .arg(Arg::new("template_name").help("The project to use")),
         )
         .subcommand(Command::new("path").about("Shows the resource paths used by tau"))
-        .subcommand(Command::new("list").about("Shows available templates"));
+        .subcommand(Command::new("list").about("Shows available templates"))
+        .subcommand(
+            Command::new("exec").about("Executes a command").arg(
+                Arg::new("name")
+                    .help("The name of the command")
+                    .value_parser(clap::value_parser!(String)),
+            ),
+        );
 
     let directory = Directory::new()?;
     let mut config = directory.get_config()?;
@@ -45,7 +53,7 @@ fn app() -> Result<()> {
                         .help("Show the time of the command")
                         .num_args(0)
                         .long("time")
-                        .short('t')
+                        .short('t'),
                 )
                 .about(&description);
 
@@ -79,15 +87,52 @@ fn app() -> Result<()> {
                 let template_name: Option<&String> = args.get_one("template_name");
 
                 if let Ok(context) = context {
-                    config.0.insert(context.template_name, context.project_config);
+                    config
+                        .0
+                        .insert(context.template_name, context.project_config);
                 }
 
                 let context = Context::new(project_name, template_name, &directory, &mut config)?;
-                config.0.insert(context.template_name, context.project_config);
+                config
+                    .0
+                    .insert(context.template_name, context.project_config);
                 config.update(&directory)?;
             }
             ("path", _) => directory.display()?,
             ("list", _) => config.display(&directory)?,
+            ("exec", args) => {
+                let commands = directory.get_commands()?;
+                let name: Option<&String> = args.get_one("name");
+
+                if let Some(name) = name {
+                    if let Some(commands) = commands.0.get(name) {
+                        for group in commands {
+                            println!("");
+                            println!(">> {}", group.name.bold());
+
+                            if let Some(description) = &group.description {
+                                println!("{}", format!("// {}", description).dimmed());
+                            }
+
+                            println!("");
+                            for command in &group.commands {
+                                println!("{}", command.bold().cyan());
+                            }
+                        }
+                    } else {
+                        return Err(anyhow!("Command not found"));
+                    }
+                } else {
+                    println!("");
+                    for (name, commands) in commands.0.iter() {
+                        println!(
+                            "{} {}",
+                            name.bold(),
+                            format!("[{}]", commands.len()).bold().cyan()
+                        );
+                    }
+                }
+            }
             (name, args) => {
                 let context = context?;
 
@@ -114,7 +159,9 @@ fn app() -> Result<()> {
                     return Err(anyhow!("Command not found"));
                 }
 
-                config.0.insert(context.template_name, context.project_config);
+                config
+                    .0
+                    .insert(context.template_name, context.project_config);
                 config.update(&directory)?;
             }
         };

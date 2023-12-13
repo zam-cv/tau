@@ -4,7 +4,8 @@
       ".gitignore",
       "README.md",
       "tests/test.cpp",
-      "include/add.h"
+      "include/add.h",
+      ".vscode/"
     ],
     "commands": {
       "run": {
